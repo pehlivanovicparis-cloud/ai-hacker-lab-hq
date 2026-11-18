@@ -1,0 +1,146 @@
+:root {
+  --bg: #0f141a;
+  --surface: #18202a;
+  --surface-2: #1f2a37;
+  --text: #e8eef4;
+  --muted: #9fb0c0;
+  --accent: #5ec8a0;
+  --accent-2: #e0a458;
+  --danger: #e06c5e;
+  --border: #2c3a48;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+header, main, footer { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+header { padding-top: 28px; }
+footer { padding: 24px 16px 40px; color: var(--muted); font-size: 0.9rem; }
+
+h1 { margin: 0 0 4px; font-size: 1.9rem; }
+h2 { margin-top: 36px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+h3 { margin: 0 0 6px; font-size: 1.05rem; }
+
+.subtitle { color: var(--muted); margin: 0 0 12px; }
+.ethics {
+  background: var(--surface-2);
+  border-left: 4px solid var(--accent-2);
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+}
+
+section { margin-bottom: 8px; }
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.stats span {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.meta { color: var(--muted); font-size: 0.9rem; margin: 0 0 8px; }
+.lesson { color: var(--muted); font-style: italic; }
+.updated { color: var(--muted); font-size: 0.85rem; margin-left: 10px; }
+.empty { color: var(--muted); }
+.pass-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #0c1a12;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin: 4px 0;
+}
+
+label { display: block; margin: 10px 0; font-weight: 600; }
+label input, label textarea, label select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #0d1218;
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+label textarea { resize: vertical; }
+
+button {
+  background: var(--accent);
+  color: #0c1a12;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover { filter: brightness(1.1); }
+button[type="button"].delete-journal,
+button[type="button"].delete-finding { background: var(--danger); color: #fff; }
+#restore-cancel { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+
+.plan-list { list-style: none; padding: 0; }
+.plan-list li {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.plan-list label { margin: 0; font-weight: 400; }
+.plan-list input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; vertical-align: middle; }
+
+.backup-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+
+#restore-confirm {
+  background: var(--surface-2);
+  border: 2px solid var(--accent-2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+#restore-confirm button { margin-right: 8px; }
+
+.hidden { display: none; }
+
+#backup-status { margin-top: 12px; color: var(--muted); }
+
+/* Visible keyboard focus */
+:focus-visible {
+  outline: 3px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+/* Print: clean portfolio, no buttons or forms */
+@media print {
+  body { background: #fff; color: #111; }
+  header, main, footer { max-width: none; }
+  button, form, #backup-section, .ethics { display: none !important; }
+  .card, .stats span, .plan-list li { background: #fff; border-color: #999; color: #111; }
+  .meta, .lesson, .updated, .empty, #backup-status { color: #444; }
+  h2 { border-color: #999; }
+}
