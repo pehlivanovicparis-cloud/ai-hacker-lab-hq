@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Hacker Lab HQ</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>AI Hacker Lab HQ</h1>
+  <p class="subtitle">PortSwigger Web LLM Attacks &middot; Lakera Gandalf Agent Breaker &middot; 30-day red-team plan</p>
+  <p class="ethics"><strong>Authorized labs only.</strong> PortSwigger Academy and Lakera Gandalf are intentionally vulnerable training apps. Never run these techniques against production or real systems without written authorization.</p>
+</header>
+
+<main>
+  <section id="overview" aria-labelledby="overview-h">
+    <h2 id="overview-h">Overview</h2>
+    <div class="stats" id="stats" role="status" aria-live="polite"></div>
+    <p id="next-up"></p>
+  </section>
+
+  <section id="labs-section" aria-labelledby="labs-h">
+    <h2 id="labs-h">PortSwigger Web LLM Attacks — 7 labs</h2>
+    <div id="labs"></div>
+  </section>
+
+  <section id="lakera-section" aria-labelledby="lakera-h">
+    <h2 id="lakera-h">Lakera Gandalf Agent Breaker — 10 apps</h2>
+    <p>Score 0–100 per app. <strong>75+ passes.</strong></p>
+    <div id="lakera"></div>
+  </section>
+
+  <section id="plan-section" aria-labelledby="plan-h">
+    <h2 id="plan-h">30-Day Plan</h2>
+    <div id="plan"></div>
+  </section>
+
+  <section id="journal-section" aria-labelledby="journal-h">
+    <h2 id="journal-h">Prompt Journal</h2>
+    <form id="journal-form">
+      <label>Title <input type="text" id="journal-title" maxlength="200" required></label>
+      <label>Lab / app <input type="text" id="journal-labref" maxlength="60" placeholder="e.g. lab-1, app-3"></label>
+      <label>Notes <textarea id="journal-body" rows="4" maxlength="8000"></textarea></label>
+      <button type="submit">Add entry</button>
+    </form>
+    <div id="journal-list"></div>
+  </section>
+
+  <section id="findings-section" aria-labelledby="findings-h">
+    <h2 id="findings-h">Report Findings</h2>
+    <form id="finding-form">
+      <label>Target <input type="text" id="finding-target" maxlength="200" required></label>
+      <label>Finding <input type="text" id="finding-title" maxlength="200" required></label>
+      <label>Impact <input type="text" id="finding-impact" maxlength="200"></label>
+      <label>Evidence <textarea id="finding-evidence" rows="3" maxlength="8000"></textarea></label>
+      <label>Repro steps <textarea id="finding-repro" rows="3" maxlength="8000"></textarea></label>
+      <label>Recommendation <textarea id="finding-recommendation" rows="3" maxlength="8000"></textarea></label>
+      <button type="submit">Save finding</button>
+    </form>
+    <div id="findings-list"></div>
+  </section>
+
+  <section id="backup-section" aria-labelledby="backup-h">
+    <h2 id="backup-h">Backup &amp; Restore</h2>
+    <p>One-click backup, Markdown portfolio export, and two-step confirmed restore. A bad backup changes nothing.</p>
+    <div class="backup-buttons">
+      <button id="download-json" type="button">Download JSON backup</button>
+      <button id="download-md" type="button">Download Markdown portfolio</button>
+    </div>
+    <form id="restore-form">
+      <label>Restore from a JSON backup file
+        <input type="file" id="restore-file" accept="application/json,.json" required>
+      </label>
+      <button type="submit">Validate backup</button>
+    </form>
+    <div id="restore-confirm" class="hidden" role="alert">
+      <p id="restore-summary"></p>
+      <p><strong>This replaces ALL current progress, journal entries, and findings.</strong> Original ids and timestamps from the backup are preserved.</p>
+      <button id="restore-apply" type="button">Yes, restore this backup</button>
+      <button id="restore-cancel" type="button">Cancel</button>
+    </div>
+    <p id="backup-status" role="status" aria-live="polite"></p>
+  </section>
+</main>
+
+<footer>
+  <p>AI Hacker Lab HQ v1.0.0 — proprietary work of Paris Pehlivanovic. All rights reserved.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
