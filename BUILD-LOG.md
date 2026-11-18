@@ -6,12 +6,12 @@ Stack: Node.js stdlib only, zero dependencies. `node server.js`, port 3000
 (`PORT` override). Data in `data/data.json`, created from `data/seed.json`
 on first run; `data/data.json` is gitignored.
 
-## What shipped (9 files, repo pehlivanovicparis-cloud/ai-hacker-lab-hq, main)
+## What shipped (10 files, repo pehlivanovicparis-cloud/ai-hacker-lab-hq, main)
 - package.json, server.js, public/index.html, public/app.js, public/styles.css
 - data/seed.json (Lab 1 pre-seeded solved, confirmed 2026-11-18 writeup)
 - README.md, LICENSE (© 2026 Paris Pehlivanovic, all rights reserved), .gitignore
-- Head commit: 60b3b12bb4d1ac82e6e4b595654981a224760c9c (LICENSE)
-  9 commits total on top of GitHub's Initial commit (one per file — see below).
+- Head commit: d096a56ed382ee75cf7b26266c2993a21544a790 (BUILD-LOG.md)
+  10 commits total on top of GitHub's Initial commit (one per file — see below).
 
 ## Push note (important)
 `github push-files` FAILED twice with the same error (both approved):
