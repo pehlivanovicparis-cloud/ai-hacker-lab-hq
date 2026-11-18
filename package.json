@@ -1,0 +1,1 @@
+{"description":"AI Hacker Lab HQ — curriculum tracker for the PortSwigger Web LLM Attacks labs, Lakera Gandalf Agent Breaker, and the 30-day red-team plan. Proprietary work of Paris Pehlivanovic.","license":"UNLICENSED","main":"server.js","name":"ai-hacker-lab-hq","private":true,"scripts":{"start":"node server.js"},"version":"1.0.0"}
