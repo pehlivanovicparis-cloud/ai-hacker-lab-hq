@@ -75,19 +75,32 @@ function emptyState() {
   return { labs: [], lakera: [], planChecks: [], journal: [], findings: [], nextJournalId: 1, nextFindingId: 1 };
 }
 
-function loadState() {
-  try {
-    if (fs.existsSync(DATA_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-      if (parsed && typeof parsed === 'object') return normalizeState(parsed);
-    }
-  } catch (err) {
-    console.error('data.json unreadable, falling back to seed:', err.message);
-  }
-  const seed = JSON.parse(fs.readFileSync(SEED_FILE, 'utf8'));
-  const state = normalizeState(seed);
-  saveState(state);
+// Store: file-backed locally (data/data.json, created from seed on first
+// run — identical to the original behaviour), Vercel KV-backed when
+// KV_REST_API_URL + KV_REST_API_TOKEN are set. See lib/store.js.
+const { createStore } = require('./lib/store');
+const store = createStore({
+  key: 'labhq:state',
+  seedPath: SEED_FILE,
+  dataPath: DATA_FILE,
+  normalize: normalizeState,
+  onCorrupt: 'seed',
+});
+
+// In-memory state. File mode: loaded once, like the original server.
+// KV mode: reloaded fresh from KV on every request (a serverless
+// invocation must never trust a warm in-memory copy).
+let state = null;
+
+async function ensureState() {
+  if (state === null || store.useKv) state = await store.load();
   return state;
+}
+
+// Same save semantics as before: every mutation commits. File mode writes
+// via tmp file + rename; KV mode writes the whole state to the KV key.
+async function saveState(s) {
+  await store.save(s);
 }
 
 // Keep only known fields; fill missing counters from existing rows.
@@ -106,14 +119,6 @@ function normalizeState(raw) {
 function maxId(rows) {
   return rows.reduce((m, r) => Math.max(m, r.id || 0), 0);
 }
-
-function saveState(state) {
-  const tmp = DATA_FILE + '.tmp-' + process.pid;
-  fs.writeFileSync(tmp, JSON.stringify(state, null, 2) + '\n', 'utf8');
-  fs.renameSync(tmp, DATA_FILE);
-}
-
-let state = loadState();
 
 // ---------------------------------------------------------------------------
 // Validation (strict: unknown curriculum ids are rejected, never stored)
@@ -345,7 +350,7 @@ async function handleApi(req, res, pathname, method) {
     const row = { labId: b.labId, status: b.status, writeup: b.writeup || '', toolList: b.toolList || '', promptsUsed: b.promptsUsed || '', updatedAt: new Date().toISOString() };
     const i = state.labs.findIndex(r => r.labId === b.labId);
     if (i >= 0) state.labs[i] = row; else state.labs.push(row);
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, lab: row });
   }
 
@@ -361,7 +366,7 @@ async function handleApi(req, res, pathname, method) {
     const row = { appId: b.appId, status: b.status, score: (b.score === undefined ? null : b.score), notes: b.notes || '', updatedAt: new Date().toISOString() };
     const i = state.lakera.findIndex(r => r.appId === b.appId);
     if (i >= 0) state.lakera[i] = row; else state.lakera.push(row);
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, lakera: row });
   }
 
@@ -372,7 +377,7 @@ async function handleApi(req, res, pathname, method) {
     if (typeof b.done !== 'boolean') return badRequest(res, 'done must be a boolean');
     const i = state.planChecks.findIndex(r => r.blockId === b.blockId);
     if (i >= 0) state.planChecks[i].done = b.done; else state.planChecks.push({ blockId: b.blockId, done: b.done });
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, planChecks: state.planChecks });
   }
 
@@ -383,7 +388,7 @@ async function handleApi(req, res, pathname, method) {
     if (!isStr(b.body || '', 8000) || !isStr(b.labRef || '', 60)) return badRequest(res, 'body/labRef exceed length limits');
     const entry = { id: state.nextJournalId++, title: b.title, body: b.body || '', labRef: b.labRef || '', createdAt: new Date().toISOString() };
     state.journal.push(entry);
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, id: entry.id, entry });
   }
 
@@ -397,7 +402,7 @@ async function handleApi(req, res, pathname, method) {
     if (!isStr(b.title, 200, 1)) return badRequest(res, 'title is required (max 200 chars)');
     if (!isStr(b.body || '', 8000) || !isStr(b.labRef || '', 60)) return badRequest(res, 'body/labRef exceed length limits');
     entry.title = b.title; entry.body = b.body || ''; entry.labRef = b.labRef || '';
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, entry });
   }
 
@@ -407,7 +412,7 @@ async function handleApi(req, res, pathname, method) {
     const i = state.journal.findIndex(j => j.id === id);
     if (i < 0) return notFound(res, 'journal entry not found');
     state.journal.splice(i, 1);
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true });
   }
 
@@ -420,7 +425,7 @@ async function handleApi(req, res, pathname, method) {
     }
     const f = { id: state.nextFindingId++, target: b.target, finding: b.finding, impact: b.impact || '', evidence: b.evidence || '', repro: b.repro || '', recommendation: b.recommendation || '', createdAt: new Date().toISOString() };
     state.findings.push(f);
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, id: f.id, finding: f });
   }
 
@@ -437,7 +442,7 @@ async function handleApi(req, res, pathname, method) {
     }
     f.target = b.target; f.finding = b.finding; f.impact = b.impact || '';
     f.evidence = b.evidence || ''; f.repro = b.repro || ''; f.recommendation = b.recommendation || '';
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, finding: f });
   }
 
@@ -447,7 +452,7 @@ async function handleApi(req, res, pathname, method) {
     const i = state.findings.findIndex(x => x.id === id);
     if (i < 0) return notFound(res, 'finding not found');
     state.findings.splice(i, 1);
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true });
   }
 
@@ -472,7 +477,7 @@ async function handleApi(req, res, pathname, method) {
     // Atomic swap: the validated backup replaces everything at once,
     // preserving original ids and timestamps.
     state = normalizeState(b.state);
-    saveState(state);
+    await saveState(state);
     return sendJson(res, 200, { ok: true, restored: true, summary });
   }
 
@@ -500,20 +505,30 @@ function serveStatic(req, res, pathname) {
 // Server
 // ---------------------------------------------------------------------------
 
-const server = http.createServer((req, res) => {
+// The request handler is exported so Vercel can run it serverless
+// (api/index.js). `node server.js` still starts the standalone server.
+async function handler(req, res) {
+  await ensureState();
   const url = new URL(req.url, 'http://localhost');
   const pathname = url.pathname;
   if (pathname.startsWith('/api/')) {
-    handleApi(req, res, pathname, req.method).catch(err => {
-      console.error('API error:', err.message);
-      if (!res.headersSent) sendJson(res, 500, { ok: false, error: 'internal error' });
-    });
+    await handleApi(req, res, pathname, req.method);
     return;
   }
   if (req.method !== 'GET') return sendJson(res, 405, { ok: false, error: 'method not allowed' });
   serveStatic(req, res, pathname);
-});
+}
 
-server.listen(PORT, () => {
-  console.log('AI Hacker Lab HQ listening on http://localhost:' + PORT);
-});
+module.exports = handler;
+
+if (require.main === module) {
+  const server = http.createServer((req, res) => {
+    handler(req, res).catch(err => {
+      console.error('API error:', err.message);
+      if (!res.headersSent) sendJson(res, 500, { ok: false, error: 'internal error' });
+    });
+  });
+  server.listen(PORT, () => {
+    console.log('AI Hacker Lab HQ listening on http://localhost:' + PORT);
+  });
+}
